@@ -40,7 +40,7 @@ func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, function string, args [
 		return nil, errors.New("Incorrect number of arguments. Expecting 1")
 	}
 
-	err := stub.PutState("hello_world", []byte(args[0]))
+	err := stub.PutState("my_bc", []byte(args[0]))
 	if err != nil {
 		return nil, err
 	}
@@ -118,17 +118,18 @@ func (t *SimpleChaincode) read(stub *shim.ChaincodeStub, args []string) ([]byte,
 
 // delete - delte function 
 func (t *SimpleChaincode) delete(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+
+	if len(args) != 1 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 1")
+	}
+
 	var key
 	var err error
 
-	if len(args) != 1 {
-		return nil, errors.New("Incorrect number of arguments. Expecting name of the key to query")
-	}
-
 	key = args[0]
-	err := stub.DelState(key)
+	err = stub.DelState(key)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Failed to delete state")
 	}
 
 	return nil, nil
