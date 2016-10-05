@@ -58,7 +58,7 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args
 	} else if function == "write" {
 		return t.write(stub, args)
 	} else if function == "delete" {
-		return t.delete(sub, args)
+		return t.delete(stub, args)
 	}
 	fmt.Println("invoke did not find func: " + function)
 
@@ -123,7 +123,7 @@ func (t *SimpleChaincode) delete(stub *shim.ChaincodeStub, args []string) ([]byt
 		return nil, errors.New("Incorrect number of arguments. Expecting 1")
 	}
 
-	var key
+	var key string
 	var err error
 
 	key = args[0]
