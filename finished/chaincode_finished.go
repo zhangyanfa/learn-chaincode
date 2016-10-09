@@ -19,9 +19,21 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"encoding/json"
+	"time"
+	"strings"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
+
+type Package struct{
+	assetId string `json:"assetId"`					//the fieldtags are needed to keep case from bouncing around
+	carrier string `json:"color"`
+	temperature string `json:"size"`
+	location string `json:"user"`
+	datetime string `json:datetime`
+}
 
 // SimpleChaincode example simple Chaincode implementation
 type SimpleChaincode struct {
@@ -40,11 +52,11 @@ func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, function string, args [
 		return nil, errors.New("Incorrect number of arguments. Expecting 1")
 	}
 
-	err := stub.PutState("my_bc", []byte(args[0]))
+	err := stub.PutState("my_package", []byte(args[0]))
 	if err != nil {
 		return nil, err
 	}
-	
+
 
 	return nil, nil
 }
@@ -60,6 +72,8 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args
 		return t.write(stub, args)
 	} else if function == "delete" {
 		return t.delete(stub, args)
+	} else if function == "init_package" {
+		return t.init_package(stub, args)
 	}
 	fmt.Println("invoke did not find func: " + function)
 
@@ -131,6 +145,57 @@ func (t *SimpleChaincode) delete(stub *shim.ChaincodeStub, args []string) ([]byt
 	err = stub.DelState(key)
 	if err != nil {
 		return nil, errors.New("Failed to delete state")
+	}
+
+	return nil, nil
+}
+
+// Init resets all the things
+func (t *SimpleChaincode) init_package(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+	if len(args) != 5 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 5")
+	}
+
+	if len(args[0]) <= 0 {
+		return nil, errors.New("1st argument must be a non-empty string")
+	}
+	if len(args[1]) <= 0 {
+		return nil, errors.New("2nd argument must be a non-empty string")
+	}
+	if len(args[2]) <= 0 {
+		return nil, errors.New("3rd argument must be a non-empty string")
+	}
+	if len(args[3]) <= 0 {
+		return nil, errors.New("4th argument must be a non-empty string")
+	}
+	if len(args[4]) <= 0 {
+		return nil, errors.New("5th argument must be a non-empty string")
+	}
+
+	assetId := args[0]
+	carrier := args[1]
+	temp := args[2]
+	location := args[3]
+	datetime := args[4]
+
+	//check if package already exists
+	packageAsBytes, err := stub.GetState(assetId)
+	if err != nil {
+		return nil, errors.New("Failed to get package name")
+	}
+	res := Package{}
+	json.Unmarshal(packageAsBytes, &res)
+	if res.assetId == assetId{
+		fmt.Println("This package arleady exists: " + assetId)
+		fmt.Println(res);
+		return nil, errors.New("This package arleady exists")				//all stop a marble by this name exists
+	}
+
+	//build the package json string manually
+	str := `{"assetId": "` + assetId + `", "carrier": "` + carrier + `", "temperature": ` + temp + `, "location": "` + location + `, "datetime": "` + datetime + `"}`
+	err = stub.PutState(assetId, []byte(str))									//store marble with id as key
+	if err != nil {
+		return nil, err
 	}
 
 	return nil, nil
