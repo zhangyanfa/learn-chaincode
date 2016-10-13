@@ -189,7 +189,57 @@ func (t *SimpleChaincode) init_package(stub *shim.ChaincodeStub, args []string) 
 	}
 
 	//build the package json string manually
-	str := `{"assetId": "` + assetId + `", "carrier": "` + carrier + `", "temperature": ` + temp + `, "location": "` + location + `, "datetime": "` + datetime + `"}`
+	str := `{"assetId": "` + assetId + `", "carrier": "` + carrier + `", "temperature": "` + temp + `", "location": "` + location + `", "datetime": "` + datetime + `"}`
+	err = stub.PutState(assetId, []byte(str))									//store marble with id as key
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func (t *SimpleChaincode) update_package(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+	if len(args) != 5 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 5")
+	}
+
+	if len(args[0]) <= 0 {
+		return nil, errors.New("1st argument must be a non-empty string")
+	}
+	if len(args[1]) <= 0 {
+		return nil, errors.New("2nd argument must be a non-empty string")
+	}
+	if len(args[2]) <= 0 {
+		return nil, errors.New("3rd argument must be a non-empty string")
+	}
+	if len(args[3]) <= 0 {
+		return nil, errors.New("4th argument must be a non-empty string")
+	}
+	if len(args[4]) <= 0 {
+		return nil, errors.New("5th argument must be a non-empty string")
+	}
+
+	assetId := args[0]
+	carrier := args[1]
+	temp := args[2]
+	location := args[3]
+	datetime := args[4]
+
+	//check if package already exists
+	/*packageAsBytes, err := stub.GetState(assetId)
+	if err != nil {
+		return nil, errors.New("Failed to get package name")
+	}
+	res := Package{}
+	json.Unmarshal(packageAsBytes, &res)
+	if res.assetId == assetId{
+		fmt.Println("This package arleady exists: " + assetId)
+		fmt.Println(res);
+		return nil, errors.New("This package arleady exists")				//all stop a marble by this name exists
+	}*/
+
+	//build the package json string manually
+	str := `{"assetId": "` + assetId + `", "carrier": "` + carrier + `", "temperature": "` + temp + `", "location": "` + location + `", "datetime": "` + datetime + `"}`
 	err = stub.PutState(assetId, []byte(str))									//store marble with id as key
 	if err != nil {
 		return nil, err
