@@ -240,7 +240,7 @@ func (t *SimpleChaincode) update_package(stub *shim.ChaincodeStub, args []string
 
 	//build the package json string manually
 	str := `{"assetId": "` + assetId + `", "carrier": "` + carrier + `", "temperature": "` + temp + `", "location": "` + location + `", "datetime": "` + datetime + `"}`
-	err = stub.PutState(assetId, []byte(str))									//store marble with id as key
+	err := stub.PutState(assetId, []byte(str))									//store marble with id as key
 	if err != nil {
 		return nil, err
 	}
