@@ -25,7 +25,7 @@ import (
 )
 
 type Package struct{
-	assetId string `json:"assetId"`					//the fieldtags are needed to keep case from bouncing around
+	assetId string `json:"assetId"`
 	carrier string `json:"color"`
 	temperature string `json:"size"`
 	location string `json:"user"`
